@@ -47,6 +47,10 @@
           'svg[aria-label="Loading..." i],[role="progressbar"]{display:none !important}';
         (document.head || document.documentElement).appendChild(st);
       }
+      // Bring the viewport to the top BEFORE locking: Stories live at the top of
+      // the home page, so freezing a scrolled-down position (e.g. blocking turned
+      // on mid-scroll) would strand them off-screen with no way to scroll back.
+      window.scrollTo(0, 0);
       // Lock the root scroller. The feed is fully blocked here so there's nothing
       // below to reach, and scrolling is what makes IG fetch+hydrate the next
       // batch (which flashes before it becomes a hidden <article>) — no scroll,
