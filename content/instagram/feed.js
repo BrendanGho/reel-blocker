@@ -28,6 +28,9 @@ window.RB.ig = window.RB.ig || {};
 // wording (NEXT_STEPS.md, Instagram Unit I-1).
 window.RB.ig.SUGGESTED_RE = /suggested (for you|posts?)/i;
 window.RB.ig.SPONSORED_RE = /^sponsored$/i;
+// Branded-content ads carry a "Paid partnership" label (sometimes "Paid
+// partnership with <brand>"), so anchor at the start rather than exact-match.
+window.RB.ig.PAID_RE = /^paid partnership/i;
 
 // Follow-state control text. CASE-SENSITIVE on purpose: IG renders the button
 // label capitalised ("Follow" / "Following" / "Requested"), but the profile
@@ -52,15 +55,22 @@ window.RB.ig.isSuggested = function (article) {
   return false;
 };
 
-// True if the article is a "Sponsored" ad unit. IG renders the label as a small
-// element in the header; match short exact-text nodes so a caption that merely
-// contains the word "sponsored" can't trigger a false positive.
+// True if the article is an ad unit — either a plain "Sponsored" post or a
+// "Paid partnership" branded-content post. IG renders the label as a small
+// element in the header; match short exact-text nodes (and aria-labels) so a
+// caption that merely contains the word "sponsored" can't trigger a false
+// positive. Length caps keep long captions from matching: "Sponsored" is exact,
+// "Paid partnership" allows a short "with <brand>" suffix.
 window.RB.ig.isSponsored = function (article) {
-  const els = article.querySelectorAll('span, div, a');
+  const els = article.querySelectorAll('span, div, a, [aria-label]');
   for (const el of els) {
     const t = (el.textContent || '').trim();
-    if (t.length > 20) continue;
-    if (window.RB.ig.SPONSORED_RE.test(t)) return true;
+    if (t.length <= 20 && window.RB.ig.SPONSORED_RE.test(t)) return true;
+    if (t.length <= 40 && window.RB.ig.PAID_RE.test(t)) return true;
+    const al = (el.getAttribute && el.getAttribute('aria-label') || '').trim();
+    if (al && (window.RB.ig.SPONSORED_RE.test(al) || window.RB.ig.PAID_RE.test(al))) {
+      return true;
+    }
   }
   return false;
 };
