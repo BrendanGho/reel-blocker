@@ -77,15 +77,16 @@ function updateDynamicRules(enabled) {
 
 function syncFromStorage() {
   chrome.storage.sync.get(['blockingEnabled'], (res) => {
-    // Default ON per spec when unset.
-    updateDynamicRules(res.blockingEnabled !== false);
+    // Default OFF when unset: all toggles start disabled on first install.
+    updateDynamicRules(res.blockingEnabled === true);
   });
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  // Seed the timer's start time if blocking defaults on and it's unset.
+  // Blocking defaults OFF on install, so the timer's start time is seeded only
+  // when the user later turns blocking on (handled in popup.js), not here.
   chrome.storage.sync.get('blockingEnabled', (s) => {
-    const enabled = s.blockingEnabled !== false;
+    const enabled = s.blockingEnabled === true;
     if (enabled) {
       chrome.storage.local.get('blockingStartTime', (l) => {
         if (l.blockingStartTime == null) {

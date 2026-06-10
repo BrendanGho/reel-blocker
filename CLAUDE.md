@@ -308,7 +308,7 @@ Never add class-name selectors.
 ### Timer
 - Displayed as: `X days  Y hrs  Z min`
 - Counts elapsed time since the master toggle was last turned on
-- Tracks `blockingStartTime` — set when blocking is turned on, including on install if the default is on
+- Tracks `blockingStartTime` — set when blocking is turned on (blocking ships OFF on install, so the timer starts only once the user enables it)
 - Turning the master toggle OFF pauses the timer and freezes the last elapsed value (`pausedElapsed`)
 - Turning it back ON resets the timer to zero and starts counting again
 - Calculate elapsed time once when the popup opens — no polling needed, popup lifecycle is too short for intervals to matter
@@ -322,14 +322,14 @@ Never add class-name selectors.
 ```javascript
 // browser.storage.sync — syncs across user's browsers
 {
-  blockingEnabled: true,          // master switch — all feed/short-form content on/off
+  blockingEnabled: false,         // master switch — all feed/short-form content on/off (ships OFF; user opts in)
   allowFollowing: false,          // universal sub-toggle — show content from people you follow
 }
 
 // browser.storage.local — device-specific, not synced
 {
   blockingStartTime: 1748000000000, // Date.now() when the master toggle was turned on
-  // Set on install (if blockingEnabled defaults on).
+  // Not set on install (blockingEnabled ships OFF); set the first time blocking is turned on.
   // Reset to now whenever blocking is turned on after being off.
   pausedElapsed: 0,                 // ms elapsed, frozen when blocking is turned off
 }

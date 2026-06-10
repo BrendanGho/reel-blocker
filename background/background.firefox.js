@@ -28,10 +28,10 @@ browser.webNavigation.onBeforeNavigate.addListener(function(details) {
 
   if (!newUrl) return;
 
-  // Promise form: Firefox's browser.* ignores callbacks. Default ON when unset.
+  // Promise form: Firefox's browser.* ignores callbacks. Default OFF when unset.
   Promise.resolve(browser.storage.sync.get(['blockingEnabled']))
     .then(function(result) {
-      if (result.blockingEnabled === false) return;
+      if (result.blockingEnabled !== true) return;
       browser.tabs.update(details.tabId, { url: newUrl });
     })
     .catch(function(e) { console.error('[reel-blocker] storage read failed:', e); });

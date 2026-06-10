@@ -12,10 +12,10 @@
 // chrome.storage is async, so we can't read the real settings synchronously at
 // document_start. Instead we read a mirror of the toggle state kept in the
 // page-origin localStorage (written by instagram.js whenever settings load or
-// change). Unknown -> assume the spec default (blocking on, following off) and
-// hide; instagram.js re-runs apply() once real settings resolve and removes the
-// style if that assumption was wrong (worst case: a brief blank feed, never a
-// reel flash).
+// change). Toggles ship DISABLED on first install, so an unknown mirror means
+// "don't pre-hide"; instagram.js re-runs apply() once real settings resolve and
+// adds the style if blocking is actually on (worst case before the mirror is
+// seeded: one reel flash on the very first page load after install).
 (function () {
   window.RB = window.RB || {};
   var STYLE_ID = 'rb-preempt-hide-feed';
@@ -25,11 +25,11 @@
     try {
       var b = localStorage.getItem('rb:blockingEnabled');
       var f = localStorage.getItem('rb:allowFollowing');
-      var blocking = b === null ? true : b === '1';  // default ON
-      var follow = f === '1';                         // default OFF
+      var blocking = b === '1';   // default OFF (toggles start disabled on install)
+      var follow = f === '1';     // default OFF
       return blocking && !follow;
     } catch (e) {
-      return true;  // localStorage blocked -> fail toward hiding on home
+      return false;  // unknown state -> don't pre-hide; instagram.js applies real settings
     }
   }
 

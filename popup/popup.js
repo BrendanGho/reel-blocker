@@ -36,7 +36,7 @@ async function init() {
   const blockEl = document.getElementById('block-toggle');
   const followEl = document.getElementById('follow-toggle');
 
-  let sync = { blockingEnabled: true, allowFollowing: false };
+  let sync = { blockingEnabled: false, allowFollowing: false };
   let local = { blockingStartTime: null, pausedElapsed: 0 };
   try {
     sync = Object.assign(sync, await getSync(['blockingEnabled', 'allowFollowing']));

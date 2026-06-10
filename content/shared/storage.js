@@ -17,7 +17,7 @@ window.RB = window.RB || {};
 // API. (The previous callback form broke entirely on Firefox: the cache never
 // loaded real values, so every toggle read as its hardcoded default.)
 window.RB.storage = (function () {
-  const DEFAULTS = { blockingEnabled: true, allowFollowing: false };
+  const DEFAULTS = { blockingEnabled: false, allowFollowing: false };
   let cache = Object.assign({}, DEFAULTS);
 
   // Normalise whatever the storage API returns into a real Promise, so this
