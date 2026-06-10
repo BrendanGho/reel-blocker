@@ -1,0 +1,55 @@
+/* popup/popup.css - Reel Blocker popup styling */
+
+body {
+  margin: 0;
+  background-color: #111;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+}
+
+.rb-popup {
+  width: 280px;
+  box-sizing: border-box;
+  padding: 16px;
+}
+
+.rb-title {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 12px;
+}
+
+.rb-label {
+  font-size: 13px;
+  color: #888;
+}
+
+.rb-timer {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+
+.divider {
+  height: 1px;
+  border: 0;
+  background-color: #333;
+  margin: 16px 0;
+}
+
+.rb-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.rb-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #3a7dff;
+  cursor: pointer;
+}

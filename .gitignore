@@ -1,0 +1,16 @@
+build.log
+node_modules/
+*.tar.xz
+
+# Python / venv
+.venv/
+__pycache__/
+*.pyc
+
+# Harness artifacts — must survive `git clean -fd` between clean-slate retries
+run_state.json
+run_report.md
+
+# Claude Code agent worktrees — created by claude CLI, not part of the repo
+.claude/worktrees/
+dist/

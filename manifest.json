@@ -1,0 +1,94 @@
+{
+  "manifest_version": 3,
+  "name": "Reel Blocker",
+  "version": "1.0",
+  "description": "Blocks short-form video content across platforms to help users break addictive scroll habits",
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  "permissions": [
+    "storage",
+    "declarativeNetRequest",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "*://*.instagram.com/*",
+    "*://*.tiktok.com/*",
+    "*://*.youtube.com/*",
+    "*://*.facebook.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.instagram.com/*"],
+      "js": ["content/instagram/preempt.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["*://*.instagram.com/*"],
+      "js": [
+        "lib/browser-polyfill.js",
+        "content/shared/storage.js",
+        "content/shared/blocker.js",
+        "content/shared/observer.js",
+        "content/instagram/nav.js",
+        "content/instagram/redirect.js",
+        "content/instagram/feed.js",
+        "content/instagram/explore.js",
+        "content/instagram/profile.js",
+        "content/instagram/dms.js",
+        "content/instagram/instagram.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://*.tiktok.com/*"],
+      "js": [
+        "lib/browser-polyfill.js",
+        "content/shared/storage.js",
+        "content/shared/blocker.js",
+        "content/shared/observer.js",
+        "content/tiktok/redirect.js",
+        "content/tiktok/feed.js",
+        "content/tiktok/following.js",
+        "content/tiktok/nav.js",
+        "content/tiktok/dms.js",
+        "content/tiktok/tiktok.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": [
+        "lib/browser-polyfill.js",
+        "content/shared/storage.js",
+        "content/shared/blocker.js",
+        "content/shared/observer.js",
+        "content/youtube/youtube.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://*.facebook.com/*"],
+      "js": [
+        "lib/browser-polyfill.js",
+        "content/shared/storage.js",
+        "content/shared/blocker.js",
+        "content/shared/observer.js",
+        "content/facebook/nav.js",
+        "content/facebook/redirect.js",
+        "content/facebook/feed.js",
+        "content/facebook/facebook.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html"
+  }
+}
