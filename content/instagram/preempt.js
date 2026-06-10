@@ -40,11 +40,23 @@
         var st = document.createElement('style');
         st.id = STYLE_ID;
         // Stories are not <article> elements, so this never touches them.
-        st.textContent = 'article{display:none !important}';
+        // Loader doubles as IG's infinite-scroll sentinel — hiding it (no layout
+        // box) stops the idle fetch loop and the spinner/skeleton flicker.
+        st.textContent =
+          'article{display:none !important}' +
+          'svg[aria-label="Loading..." i],[role="progressbar"]{display:none !important}';
         (document.head || document.documentElement).appendChild(st);
       }
-    } else if (have) {
-      have.remove();
+      // Lock the root scroller. The feed is fully blocked here so there's nothing
+      // below to reach, and scrolling is what makes IG fetch+hydrate the next
+      // batch (which flashes before it becomes a hidden <article>) — no scroll,
+      // no fetch, no flash. Must be inline + 'important': IG's own class-scoped
+      // `html{overflow:scroll !important}` rule outranks a plain stylesheet rule
+      // of ours on specificity, but inline !important beats any stylesheet rule.
+      document.documentElement.style.setProperty('overflow', 'hidden', 'important');
+    } else {
+      if (have) have.remove();
+      document.documentElement.style.removeProperty('overflow');
     }
   }
 
