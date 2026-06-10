@@ -19,6 +19,33 @@
 (function () {
   window.RB = window.RB || {};
   var STYLE_ID = 'rb-preempt-hide-feed';
+  var CURTAIN_ID = 'rb-preempt-curtain';
+  var REVEAL_MS = 1000;          // how long <main> stays masked after (re)entry
+  var curtainTimer = null;
+
+  // Fail-open feed-region curtain. Masks the WHOLE <main> (the feed region) so
+  // the pre-<article> hydration content IG paints on first load / SPA return to
+  // home can't flash — no `article` rule can catch that content because it isn't
+  // an <article> yet. The nav rail lives OUTSIDE <main>, so it stays usable.
+  // Stories live inside <main> and are masked too, which is why this is strictly
+  // time-bounded: reveal() runs after REVEAL_MS, by which point any feed posts
+  // have become display:none'd <article>s, so un-masking shows Stories + a blank
+  // feed with no flash. visibility (not display) preserves layout -> no reflow on
+  // reveal. Fail-open by design: if `main[role=main]` ever stops matching, the
+  // rule simply no-ops and Stories are NEVER permanently hidden.
+  function addCurtain() {
+    if (document.getElementById(CURTAIN_ID)) return;
+    var st = document.createElement('style');
+    st.id = CURTAIN_ID;
+    st.textContent = 'main[role="main"]{visibility:hidden !important}';
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  function reveal() {
+    if (curtainTimer) { clearTimeout(curtainTimer); curtainTimer = null; }
+    var c = document.getElementById(CURTAIN_ID);
+    if (c) c.remove();
+  }
 
   function wantHide() {
     if (location.pathname !== '/') return false;  // home timeline only
@@ -58,9 +85,13 @@
       // `html{overflow:scroll !important}` rule outranks a plain stylesheet rule
       // of ours on specificity, but inline !important beats any stylesheet rule.
       document.documentElement.style.setProperty('overflow', 'hidden', 'important');
+      // Mask the feed region during the initial hydration window, then auto-reveal.
+      addCurtain();
+      if (!curtainTimer) curtainTimer = setTimeout(reveal, REVEAL_MS);
     } else {
       if (have) have.remove();
       document.documentElement.style.removeProperty('overflow');
+      reveal();  // leaving block-all home (nav away / toggle off): drop the curtain now
     }
   }
 
