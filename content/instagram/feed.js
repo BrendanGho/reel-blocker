@@ -31,6 +31,11 @@ window.RB.ig.SPONSORED_RE = /^sponsored$/i;
 // Branded-content ads carry a "Paid partnership" label (sometimes "Paid
 // partnership with <brand>"), so anchor at the start rather than exact-match.
 window.RB.ig.PAID_RE = /^paid partnership/i;
+// IG's standard feed ad: a discrete "Ad" label node under the advertiser name
+// (verified live 2026-06-10 — e.g. amazonwebservices/googleworkspace ads).
+// CASE-SENSITIVE exact match: IG renders the label capitalised as "Ad", and a
+// 2-char loose match would risk catching unrelated text.
+window.RB.ig.AD_RE = /^Ad$/;
 
 // Follow-state control text. CASE-SENSITIVE on purpose: IG renders the button
 // label capitalised ("Follow" / "Following" / "Requested"), but the profile
@@ -55,16 +60,17 @@ window.RB.ig.isSuggested = function (article) {
   return false;
 };
 
-// True if the article is an ad unit — either a plain "Sponsored" post or a
-// "Paid partnership" branded-content post. IG renders the label as a small
-// element in the header; match short exact-text nodes (and aria-labels) so a
-// caption that merely contains the word "sponsored" can't trigger a false
-// positive. Length caps keep long captions from matching: "Sponsored" is exact,
-// "Paid partnership" allows a short "with <brand>" suffix.
+// True if the article is an ad unit — a standard "Ad"-labelled feed ad, a plain
+// "Sponsored" post, or a "Paid partnership" branded-content post. IG renders the
+// label as a small element in the header; match short exact-text nodes (and
+// aria-labels) so a caption that merely contains the word can't trigger a false
+// positive. Length caps keep long captions from matching: "Ad"/"Sponsored" are
+// exact, "Paid partnership" allows a short "with <brand>" suffix.
 window.RB.ig.isSponsored = function (article) {
   const els = article.querySelectorAll('span, div, a, [aria-label]');
   for (const el of els) {
     const t = (el.textContent || '').trim();
+    if (t.length <= 4 && window.RB.ig.AD_RE.test(t)) return true;
     if (t.length <= 20 && window.RB.ig.SPONSORED_RE.test(t)) return true;
     if (t.length <= 40 && window.RB.ig.PAID_RE.test(t)) return true;
     const al = (el.getAttribute && el.getAttribute('aria-label') || '').trim();
