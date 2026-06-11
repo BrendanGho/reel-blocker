@@ -6,6 +6,16 @@ window.RB.ig = window.RB.ig || {};
 // window.RB.ig.*Scan; orchestration lives here.
 (function () {
   function scanAll() {
+    // Reconcile the document_start mask on EVERY pass (the observer runs scanAll
+    // on every DOM mutation). The mask is home-only and permanent while there, so
+    // it must self-remove the instant we leave '/'. Doing it here — not just on
+    // the pushState/popstate hooks — means an SPA route IG drives without firing
+    // our history patch (-> messages, profile) still un-masks on its first DOM
+    // mutation, instead of stranding those pages behind a hidden <main>.
+    try {
+      if (typeof window.RB.preemptApply === 'function') window.RB.preemptApply();
+    } catch (e) { /* preempt absent; nothing to reconcile */ }
+
     const s = window.RB.storage.get();
     if (!s.blockingEnabled) {
       window.RB.unblockAll();
@@ -39,14 +49,30 @@ window.RB.ig = window.RB.ig || {};
   // createObserver() already observes document.body and runs scanAll once.
   window.RB.createObserver(scanAll);
 
+  // Track the master toggle's prior value so _onChange can detect an OFF->ON flip
+  // (which gets the reload/redirect treatment below).
+  let prevBlocking = false;
+
   // Re-scan the instant a toggle flips. A flip can both REVEAL and HIDE: turning
   // allowFollowing ON must un-hide already-blocked followed posts, and re-enabling
   // the master toggle must re-hide cleanly. scanAll() alone only hides (its scans
   // skip allowed items without clearing their existing data-rb-blocked mark), so
   // we unblockAll() first to start from a clean slate, then re-derive what stays
   // hidden. (Mirrors youtube.js onSettingsChange.)
+  //
+  // OFF->ON gets special handling: an already-rendered (and possibly scrolled)
+  // page can't be masked from document_start, so blocking it in place flickers.
+  // Instead, on a reel/audio URL redirect straight out, and on the home feed do
+  // a full reload so preempt.js masks cleanly from the top.
   window.RB.storage._onChange = function () {
+    const s = window.RB.storage.get();
+    const turnedOn = !prevBlocking && s.blockingEnabled;
+    prevBlocking = s.blockingEnabled;
     syncPreempt();
+    if (turnedOn) {
+      try { window.RB.checkAndRedirect(); } catch (e) {}
+      if (window.location.pathname === '/') { location.reload(); return; }
+    }
     window.RB.unblockAll();
     scanAll();
   };
@@ -57,6 +83,7 @@ window.RB.ig = window.RB.ig || {};
   // that should be visible under the real settings. Without clearing those
   // marks, scanAll() skips them (blockElement bails on data-rb-blocked).
   window.RB.storage.init(function () {
+    prevBlocking = window.RB.storage.get().blockingEnabled;
     syncPreempt();
     window.RB.unblockAll();
     scanAll();
@@ -79,4 +106,18 @@ window.RB.ig = window.RB.ig || {};
     setTimeout(scanAll, 400);
   };
   window.addEventListener('popstate', () => { scanAll(); setTimeout(scanAll, 400); });
+
+  // Returning to a backgrounded tab: IG resumes fetching and re-renders the feed,
+  // so a loading spinner / late posts could surface. Re-assert preempt.js's mask
+  // (self-gates to block-all home; the mask is permanent so this is idempotent and
+  // cannot flash) and re-scan so the resuming render stays suppressed. pageshow
+  // also covers bfcache restores, which don't re-run document_start.
+  function onShow() {
+    try { if (typeof window.RB.preemptRearm === 'function') window.RB.preemptRearm(); } catch (e) {}
+    scanAll();
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') onShow();
+  });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) onShow(); });
 })();
