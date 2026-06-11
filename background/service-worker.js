@@ -8,7 +8,6 @@
 const IG_RANGE = [100, 101];
 const TT_RANGE = [200, 201];
 const YT_RANGE = [300];
-const FB_RANGE = [400, 401];
 
 function rules() {
   return [
@@ -16,7 +15,7 @@ function rules() {
       id: IG_RANGE[0],
       priority: 1,
       action: { type: 'redirect',
-        redirect: { url: 'https://www.instagram.com/?variant=following' } },
+        redirect: { url: 'https://www.instagram.com/' } },
       condition: { regexFilter: '^https?://([a-z]+\\.)?instagram\\.com/reels/',
         resourceTypes: ['main_frame'] }
     },
@@ -24,7 +23,7 @@ function rules() {
       id: IG_RANGE[1],
       priority: 1,
       action: { type: 'redirect',
-        redirect: { url: 'https://www.instagram.com/?variant=following' } },
+        redirect: { url: 'https://www.instagram.com/' } },
       condition: { regexFilter: '^https?://([a-z]+\\.)?instagram\\.com/reel/',
         resourceTypes: ['main_frame'] }
     },
@@ -43,28 +42,12 @@ function rules() {
         redirect: { url: 'https://www.youtube.com/' } },
       condition: { regexFilter: '^https?://([a-z]+\\.)?youtube\\.com/shorts/',
         resourceTypes: ['main_frame'] }
-    },
-    {
-      id: FB_RANGE[0],
-      priority: 1,
-      action: { type: 'redirect',
-        redirect: { url: 'https://www.facebook.com/' } },
-      condition: { regexFilter: '^https?://([a-z]+\\.)?facebook\\.com/reel/',
-        resourceTypes: ['main_frame'] }
-    },
-    {
-      id: FB_RANGE[1],
-      priority: 1,
-      action: { type: 'redirect',
-        redirect: { url: 'https://www.facebook.com/' } },
-      condition: { regexFilter: '^https?://([a-z]+\\.)?facebook\\.com/reels/',
-        resourceTypes: ['main_frame'] }
     }
   ];
 }
 
 function allRuleIds() {
-  return [...IG_RANGE, ...TT_RANGE, ...YT_RANGE, ...FB_RANGE];
+  return [...IG_RANGE, ...TT_RANGE, ...YT_RANGE];
 }
 
 function updateDynamicRules(enabled) {

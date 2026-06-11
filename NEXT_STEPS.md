@@ -31,17 +31,17 @@ Work the units in order. One unit = one commit. Do not refactor working code.
   blocks Shorts shelves/nav/cards and redirects `/shorts/`. `allowFollowing` has
   NO effect on YouTube (the subscribed-only filter was removed — see Unit A).
   Redirect rules added in both backgrounds (`YT_RANGE = [300]`).
-- **Facebook Reels implemented** (was UNIT B) — `content/facebook/{facebook,
-  feed,nav,redirect}.js`, manifests wired, redirect rules added
-  (`FB_RANGE = [400,401]`). Reels-only scope; `allowFollowing` has no Facebook
-  effect; Messenger (messenger.com) is out of scope.
+- **Facebook prototyped and removed** (was UNIT B) — Facebook actively fights
+  blockers and its home feed can't be split cleanly into friends' vs. foreign
+  content, so support was dropped. The experiment is preserved on the
+  `archive/facebook-experiment` git branch. Do not re-add without revisiting.
 - **Instagram I-1 (suggested posts) and I-3 (profile grid) implemented** —
   `feed.js` still blocks "Suggested for you" units when `allowFollowing` is on;
   `profile.js` blocks the post grid (header preserved) unless `allowFollowing`
   is on and you follow the profile.
-- **Firefox background redirect fixed** — `background.firefox.js` now scopes the
-  Instagram regex to `instagram.com` (it previously hijacked `facebook.com/reel/`),
-  uses the promise form of storage, and adds the YouTube + Facebook patterns.
+- **Firefox background redirect fixed** — `background.firefox.js` now scopes each
+  platform's regex to its own host so one rule can never hijack another, uses the
+  promise form of storage, and adds the YouTube pattern.
 
 All of the above still needs **live-DOM selector verification** — the code is
 correct in shape but the class/aria anchors must be confirmed with the probe.
@@ -111,19 +111,16 @@ Also confirm the `/shorts/` redirect still fires (background rule +
 
 ---
 
-## UNIT B — Facebook Reels (IMPLEMENTED — verify selectors only)
+## UNIT B — Facebook (ABANDONED — archived)
 
-Done in code (`content/facebook/{facebook,feed,nav,redirect}.js`, manifests,
-`FB_RANGE = [400,401]` rules). Reels-only scope; `allowFollowing` has no effect
-on Facebook; Messenger is out of scope. Run the probe on facebook.com logged in
-and confirm:
-- Reel feed unit: `[role="article"]:has(a[href*="/reel/"])` still selects the
-  whole card (not just the video).
-- Reels tray entry: `a[href*="/reels/tray"]`.
-- Reels nav shortcut: `a[href^="/reel"][aria-label*="Reel" i]`.
-- **Must never break** (re-test manually): Messenger/DMs, normal photo/text
-  posts, Groups, Marketplace, profile pages, long-form Watch videos. If a change
-  risks any of these, leave a `// AGENT STOP:` comment and stop.
+Facebook support was prototyped and removed. Facebook actively fights blockers
+(scrambled "Sponsored" text, no stable `role="feed"`/`role="article"` on real
+home posts) and its home feed can't be split cleanly into friends' vs. foreign
+content, so partial blocking felt worse than none. The full experiment (Follow-
+CTA detection, search-filter handling, redirects) is preserved on the
+`archive/facebook-experiment` git branch. Do not re-add to this extension without
+revisiting that decision — it may make more sense as a separate, dedicated
+extension.
 
 ---
 

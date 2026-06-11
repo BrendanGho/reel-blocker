@@ -1,11 +1,15 @@
 # Agent Summary
 
 Status of the reel-blocker extension after the latest round of fixes and the
-addition of YouTube Shorts (Phase 2) and Facebook Reels. The codebase blocks
-short-form/feed content across Instagram, TikTok, YouTube and Facebook under a
-single master toggle, with two universal sub-toggles ("Allow from following",
-"Allow messaged content"). Everything is vanilla JS using the `window.RB.*`
-namespace and the shared observer/blocker/storage modules.
+addition of YouTube Shorts (Phase 2). The codebase blocks short-form/feed content
+across Instagram, TikTok and YouTube under a single master toggle, with two
+universal sub-toggles ("Allow from following", "Allow messaged content").
+Everything is vanilla JS using the `window.RB.*` namespace and the shared
+observer/blocker/storage modules.
+
+Facebook support was prototyped and removed (Facebook actively fights blockers;
+the home feed cannot be split cleanly into friends' vs. foreign content). The
+experiment is preserved on the `archive/facebook-experiment` git branch.
 
 ## Completed
 
@@ -44,18 +48,12 @@ namespace and the shared observer/blocker/storage modules.
   cards, redirects `/shorts/` to the homepage (never redirects `/`), and exposes
   subscribed-channel Shorts in `/feed/subscriptions` when `allowFollowing` is on.
   Loads the shared modules via both manifests.
-- **Facebook Reels (new).** `content/facebook/{facebook,feed,nav,redirect}.js`,
-  Reels-only scope. Hides Reels feed units and the tray, removes the Reels nav
-  shortcut, redirects `/reel/` and `/reels/`. `allowFollowing` has no Facebook
-  effect (no clean "people you follow" feed); Messenger (messenger.com) is out
-  of scope.
 - **Redirect rules.** `background/service-worker.js` (MV3 dynamic rules): IG
-  100–101, TikTok 200–201, YouTube 300, Facebook 400–401, all added/removed
-  together under the master toggle. `background/background.firefox.js` (MV2
-  webNavigation) rewritten to the promise form, default-ON semantics, and
-  **per-host scoped regexes** — the Instagram pattern is now scoped to
-  `instagram.com` so it no longer hijacks `facebook.com/reel/`. Top-level frame
-  only (`frameId === 0`).
+  100–101, TikTok 200–201, YouTube 300, all added/removed together under the
+  master toggle. `background/background.firefox.js` (MV2 webNavigation) rewritten
+  to the promise form, default-ON semantics, and **per-host scoped regexes** —
+  each platform's pattern is scoped to its own host so one rule can never hijack
+  another. Top-level frame only (`frameId === 0`).
 - **Build hygiene.** `scripts/chrome-build.sh` and `scripts/firefox-build.sh`
   stage clean `dist/chrome` and `dist/firefox` directories. Chrome rejects any
   unpacked dir containing `_`-prefixed files (e.g. `__pycache__`); the build
@@ -69,8 +67,8 @@ namespace and the shared observer/blocker/storage modules.
 - Both `dist/chrome` and `dist/firefox` rebuild cleanly; a `find` for
   `_`-prefixed / `.pyc` / `__pycache__` files in `dist/` returns nothing.
 - Both manifests parse as JSON and declare the correct host permissions and
-  content-script chains (Instagram, TikTok, YouTube, Facebook), each loading the
-  shared modules first.
+  content-script chains (Instagram, TikTok, YouTube), each loading the shared
+  modules first.
 - No `// AGENT STOP:` comments are present in the code.
 
 ## Still needs human / live-DOM verification
@@ -81,9 +79,6 @@ each site and update the relevant module if anchors have drifted:
 
 - **YouTube** — Shorts shelf/nav/link anchors and the `/feed/subscriptions`
   carve-out.
-- **Facebook** — the `role="article"` reel-card anchor, the reels tray link, and
-  the nav shortcut; manually confirm Messenger, normal posts, Groups,
-  Marketplace, profiles and long-form Watch are untouched.
 - **Instagram** — the "Suggested for you" wording (I-1), the profile
   follow-state detection and grid-cell walk (I-3), and that Stories/DMs survive.
 - **TikTok** — that the nav-rail offset matches the live rail width and that

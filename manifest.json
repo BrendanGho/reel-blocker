@@ -17,8 +17,7 @@
   "host_permissions": [
     "*://*.instagram.com/*",
     "*://*.tiktok.com/*",
-    "*://*.youtube.com/*",
-    "*://*.facebook.com/*"
+    "*://*.youtube.com/*"
   ],
   "content_scripts": [
     {
@@ -45,6 +44,11 @@
     },
     {
       "matches": ["*://*.tiktok.com/*"],
+      "js": ["content/tiktok/preempt.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["*://*.tiktok.com/*"],
       "js": [
         "lib/browser-polyfill.js",
         "content/shared/storage.js",
@@ -67,20 +71,6 @@
         "content/shared/blocker.js",
         "content/shared/observer.js",
         "content/youtube/youtube.js"
-      ],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["*://*.facebook.com/*"],
-      "js": [
-        "lib/browser-polyfill.js",
-        "content/shared/storage.js",
-        "content/shared/blocker.js",
-        "content/shared/observer.js",
-        "content/facebook/nav.js",
-        "content/facebook/redirect.js",
-        "content/facebook/feed.js",
-        "content/facebook/facebook.js"
       ],
       "run_at": "document_idle"
     }

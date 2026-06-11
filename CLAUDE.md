@@ -132,13 +132,8 @@ reel-blocker/
 │   │   ├── nav.js                  ← Hides For You / Explore nav items
 │   │   ├── dms.js                  ← Replaces TikTok video previews in DMs
 │   │   └── redirect.js             ← Handles /video/ URLs and root / redirect
-│   ├── youtube/
-│   │   └── youtube.js              ← Blocks Shorts shelves/nav/cards + /shorts/ redirect
-│   └── facebook/
-│       ├── facebook.js             ← Entry point, initialises all Facebook modules
-│       ├── feed.js                 ← Hides Reels units in feed (Reels-only scope)
-│       ├── nav.js                  ← Removes Reels shortcut from left nav
-│       └── redirect.js             ← Handles /reel/ and /reels/ URLs
+│   └── youtube/
+│       └── youtube.js              ← Blocks Shorts shelves/nav/cards + /shorts/ redirect
 ├── popup/
 │   ├── popup.html
 │   ├── popup.js
@@ -155,9 +150,16 @@ reel-blocker/
     └── timer.js                    ← Pure timer math (install/toggle/elapsed/format)
 ```
 
-Note: YouTube is now implemented (Phase 2 complete) and Facebook Reels blocking
-has been added. Both run under the single master toggle alongside Instagram and
-TikTok — there are still no per-platform controls.
+Note: YouTube is now implemented (Phase 2 complete) and runs under the single
+master toggle alongside Instagram and TikTok — there are still no per-platform
+controls.
+
+Note: Facebook support was prototyped and removed from this extension — Facebook
+actively fights blockers (scrambled "Sponsored" text, no stable feed/post roles),
+making clean blocking an ongoing maintenance treadmill better suited to its own
+dedicated extension. The full experiment (Follow-CTA home-feed detection, search-
+filter handling, redirects) is preserved on the `archive/facebook-experiment`
+git branch. Do not re-add Facebook here without revisiting that decision.
 
 ---
 
@@ -170,8 +172,8 @@ TikTok — there are still no per-platform controls.
 | Home feed — ALL items (posts AND reels) | Block the entire card for every feed item, unless "Allow from following" sub-toggle is on. Each feed item is an `<article>`; hide all of them. |
 | Stories tray / Stories viewer | Always shown — never blocked. (Stories are not `<article>` elements, so hiding articles leaves them intact.) |
 | Reels icon in nav bar | Remove element entirely |
-| `/reels/` URL | Redirect to `instagram.com/?variant=following` |
-| `/reel/XXXXXX/` URL | Redirect to `instagram.com/?variant=following` |
+| `/reels/` URL (and `/reels/XXXX/` reel permalinks) | Redirect to `instagram.com` (home) |
+| `/reel/XXXXXX/` URL | Redirect to `instagram.com` (home) |
 | External link to any reel | Same redirect |
 | Explore page | Block ALL cards (photos AND reels) — discovery is never "from people you follow", so blocked regardless of the sub-toggle |
 | Profile page — Reels tab | Remove tab; if URL path ends in `/reels/`, redirect to profile root. |
@@ -219,8 +221,8 @@ An overlay covering the feed area. Simple and clean:
 ### YouTube Shorts (Phase 2 — implemented)
 
 Runs under the same master toggle; there is no YouTube-specific control. The
-universal "Allow from following" sub-toggle has **NO effect on YouTube** (same as
-Facebook). When the master toggle is on, ALL Shorts are blocked, full stop.
+universal "Allow from following" sub-toggle has **NO effect on YouTube**. When the
+master toggle is on, ALL Shorts are blocked, full stop.
 
 A "show only Shorts from subscribed channels under allowFollowing" mode was
 prototyped and **removed**: YouTube's homepage/shelf Short cards do not expose
@@ -236,37 +238,6 @@ reliably — the filter would just hide everything. Not worth the complexity.
 | Long-form video, search, subscriptions (non-Shorts) | Never touched |
 
 Anchor on tag names plus the `/shorts/` href — never on obfuscated classes.
-
-### Facebook (implemented)
-
-Facebook blocks the **scrollable feeds** — the addictive infinite scroll — not
-the whole site. The mechanism is to hide every `[role="feed"]` container (the
-stable ARIA anchor Facebook puts on the scrollable feed list: home News Feed,
-Groups feed, Watch feed) plus Reels. Hiding just that element removes the scroll
-surface while leaving everything else usable: the top bar/search, the left nav,
-the right rail (contacts/chat), the status composer, and destination pages like
-Marketplace, Groups landing, Events, profiles and Messenger. This is preferred
-over a full-screen overlay (no fragile nav-width measurement, never covers chat,
-never swallows clicks).
-
-Because the News Feed is an algorithmic mix (friends, followed Pages, Groups,
-Marketplace, ads) with no clean "people you follow" feed, the "Allow from
-following" sub-toggle has **NO effect on Facebook**. Messaging lives on a
-separate host (`messenger.com`) and is out of scope.
-
-| Surface | Behaviour |
-|---|---|
-| Scrollable feed (`[role="feed"]`: home, Groups, Watch) | Hide the whole feed container |
-| Reels unit / tray | Hide the `role="article"` unit containing a `/reel/` link; hide `a[href*="/reels/tray"]` |
-| Reels shortcut in left nav | Remove the nav item |
-| `/reel/<id>` and `/reels/...` URLs | Redirect to `https://www.facebook.com/` (background rule + SPA hook) |
-| Top bar, left nav, right rail, composer | Never touched — stay fully usable |
-| Marketplace, Groups landing, Events, profiles | Never touched |
-| Messenger (`messenger.com`) | Out of scope — not injected |
-
-SELECTORS: Facebook class names are fully obfuscated. Anchor only on stable
-signals — `role="feed"`, a `/reel/` href, an `aria-label` containing "Reel".
-Never add class-name selectors.
 
 ---
 

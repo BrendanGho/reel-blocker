@@ -1,6 +1,6 @@
 // Firefox MV2 background page. Mirrors the MV3 service-worker's redirect rules
 // using webNavigation. Each pattern is scoped to its own host so one platform's
-// rule can never hijack another (e.g. instagram.com/reel/ vs facebook.com/reel/).
+// rule can never hijack another.
 browser.webNavigation.onBeforeNavigate.addListener(function(details) {
   // Only redirect top-level frame navigations, never sub-frames.
   if (details.frameId !== 0) return;
@@ -8,10 +8,9 @@ browser.webNavigation.onBeforeNavigate.addListener(function(details) {
   const url = details.url;
   let newUrl = null;
 
-  // Instagram reels — scoped to instagram.com so it never matches
-  // facebook.com/reel/, which Facebook also uses.
+  // Instagram reels — scoped to instagram.com.
   if (/^https?:\/\/([a-z]+\.)?instagram\.com\/(reels\/|reel\/)/.test(url)) {
-    newUrl = 'https://www.instagram.com/?variant=following';
+    newUrl = 'https://www.instagram.com/';
   }
   // TikTok video URLs.
   else if (/^https?:\/\/([a-z]+\.)?tiktok\.com\/video\//.test(url)) {
@@ -20,10 +19,6 @@ browser.webNavigation.onBeforeNavigate.addListener(function(details) {
   // YouTube Shorts.
   else if (/^https?:\/\/([a-z]+\.)?youtube\.com\/shorts\//.test(url)) {
     newUrl = 'https://www.youtube.com/';
-  }
-  // Facebook reels.
-  else if (/^https?:\/\/([a-z]+\.)?facebook\.com\/(reel\/|reels\/)/.test(url)) {
-    newUrl = 'https://www.facebook.com/';
   }
 
   if (!newUrl) return;

@@ -10,7 +10,7 @@ window.RB.yt = window.RB.yt || {};
 // removed: YouTube's homepage/shelf Short cards do not expose the channel in the
 // DOM, so subscription status can't be determined per-card reliably. Filtering
 // would hide everything anyway, so it was dropped for simplicity. allowFollowing
-// is therefore a no-op here, same as on Facebook.)
+// is therefore a no-op here.)
 //
 // When blockingEnabled is on, ALL Shorts are blocked: the homepage / feed Shorts
 // shelves, the Shorts guide/nav entry, every Shorts card in grids/search, and the
