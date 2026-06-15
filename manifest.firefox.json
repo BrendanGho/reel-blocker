@@ -43,7 +43,6 @@
         "content/instagram/feed.js",
         "content/instagram/explore.js",
         "content/instagram/profile.js",
-        "content/instagram/dms.js",
         "content/instagram/instagram.js"
       ],
       "run_at": "document_idle"
@@ -64,7 +63,6 @@
         "content/tiktok/feed.js",
         "content/tiktok/following.js",
         "content/tiktok/nav.js",
-        "content/tiktok/dms.js",
         "content/tiktok/tiktok.js"
       ],
       "run_at": "document_idle"

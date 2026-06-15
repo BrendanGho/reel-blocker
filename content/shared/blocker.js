@@ -13,18 +13,6 @@ window.RB.blockElement = function(el) {
   el.style.display = 'none';
 };
 
-// Replace element content with a styled placeholder
-// Used for DM previews that need to show text instead of hiding
-window.RB.placeholderElement = function(el, text) {
-  if (el.hasAttribute('data-rb-blocked')) return;
-  el.dataset.rbBlocked = 'true';
-
-  // Clear and style the element
-  el.innerHTML = '';
-  el.style.cssText = 'padding:12px;background:#1a1a1a;color:#888;border-radius:8px;font-size:13px;';
-  el.textContent = text;
-};
-
 // Restore all blocked elements when toggle is turned off
 window.RB.unblockAll = function() {
   document.querySelectorAll('[data-rb-blocked]').forEach(el => {

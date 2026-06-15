@@ -12,7 +12,7 @@ window.RB.tk = window.RB.tk || {};
       return;
     }
     try { window.RB.checkAndRedirect(); } catch (e) { console.error('[reel-blocker] TK redirect failed:', e); }
-    const scans = ['feedScan', 'followingScan', 'navScan', 'dmsScan'];
+    const scans = ['feedScan', 'followingScan', 'navScan'];
     for (const name of scans) {
       try {
         if (typeof window.RB.tk[name] === 'function') window.RB.tk[name]();

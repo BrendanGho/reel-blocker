@@ -22,7 +22,7 @@ window.RB.ig = window.RB.ig || {};
       return;
     }
     try { window.RB.checkAndRedirect(); } catch (e) { console.error('[reel-blocker] IG redirect failed:', e); }
-    const scans = ['navScan', 'feedScan', 'exploreScan', 'profileScan', 'dmsScan'];
+    const scans = ['navScan', 'feedScan', 'exploreScan', 'profileScan'];
     for (const name of scans) {
       try {
         if (typeof window.RB.ig[name] === 'function') window.RB.ig[name]();
