@@ -25,23 +25,22 @@ This is a real, personal-use tool. Correctness and robustness matter more than s
 This is the exact model. Implement it precisely.
 
 ```
-[Block short-form content]            [on/off]   — master switch
+[Block scrollable content]            [on/off]   — master switch
 [Allow content from people I follow]  [on/off]   — universal sub-toggle
-[Allow messaged content]              [on/off]   — universal sub-toggle
 ```
 
 ### Rules:
 - There is exactly ONE master toggle, and it is all-or-nothing: either short-form/feed content is blocked across all supported platforms, or none is. Users **cannot** block a subset of platforms — selective blocking defeats the purpose of the extension and is intentionally not offered.
-- When the master toggle is ON, blocking is active on all supported platforms simultaneously. On **Instagram this means ALL feed content — every post AND reel — is blocked, not just reels.** The only Instagram content that survives the master toggle is: **Stories** (always shown), **Messages/DMs** (always functional), and **messaged content** (only when the "Allow messaged content" sub-toggle is on). TikTok blocks the video feed; Phase 2 adds YouTube Shorts under the **same** master switch — there is no separate YouTube control, ever.
+- When the master toggle is ON, blocking is active on all supported platforms simultaneously. On **Instagram this means ALL feed content — every post AND reel — is blocked, not just reels.** The only Instagram content that survives the master toggle is: **Stories** (always shown) and **Messages/DMs** (always functional, including any reel/post shared inside a conversation). TikTok blocks the video feed; Phase 2 adds YouTube Shorts under the **same** master switch — there is no separate YouTube control, ever.
 - The "Allow from following" sub-toggle is **universal** — it applies to all platforms simultaneously.
 - When "Allow from following" is ON:
   - **Instagram**: the home feed (content from people you follow — posts AND reels) is shown. Explore, search/discovery, and /reel/ URLs remain blocked. (Stories are shown regardless.)
   - **TikTok**: the `/following` feed is accessible (For You, Explore, /video/ URLs remain blocked)
   - **YouTube**: Shorts from subscribed channels in the Subscriptions feed are shown (Shorts shelf, Shorts tab, /shorts/ URLs remain blocked)
-- The "Allow messaged content" sub-toggle is **universal**. When ON, content shared inside a conversation (e.g. a reel/post sent to you in Instagram DMs) is left visible instead of being replaced with a placeholder, so you can discuss it. When OFF (default), shared content is replaced with a "Content blocked" placeholder. Messaging itself always works regardless.
-- The sub-toggles are only meaningful when the master toggle is on.
-- Each sub-toggle state persists independently of the master toggle.
-- No per-platform toggles and no per-platform sub-toggles. One master toggle, two universal sub-toggles.
+- **Messaged content is always shown.** Content shared inside a DM conversation (e.g. a reel/post sent to you in Instagram or TikTok messages) is never blocked or replaced — messaging is sacred and you must be able to discuss what was sent. There is no toggle for this; DMs are never touched.
+- The sub-toggle is only meaningful when the master toggle is on.
+- The sub-toggle state persists independently of the master toggle.
+- No per-platform toggles and no per-platform sub-toggles. One master toggle, one universal sub-toggle.
 
 ---
 
@@ -123,14 +122,12 @@ reel-blocker/
 │   │   ├── nav.js                  ← Removes Reels icon from nav bar
 │   │   ├── explore.js              ← Blocks reels on Explore page
 │   │   ├── profile.js              ← Hides Reels tab on profile pages
-│   │   ├── dms.js                  ← Replaces reel preview cards in DMs with placeholder
 │   │   └── redirect.js             ← Handles /reels/ and /reel/XXXX/ URLs
 │   ├── tiktok/
 │   │   ├── tiktok.js               ← Entry point, initialises all TikTok modules
 │   │   ├── feed.js                 ← Blocks For You and Explore feeds
 │   │   ├── following.js            ← Handles Following feed based on sub-toggle
 │   │   ├── nav.js                  ← Hides For You / Explore nav items
-│   │   ├── dms.js                  ← Replaces TikTok video previews in DMs
 │   │   └── redirect.js             ← Handles /video/ URLs and root / redirect
 │   └── youtube/
 │       └── youtube.js              ← Blocks Shorts shelves/nav/cards + /shorts/ redirect
@@ -179,7 +176,7 @@ git branch. Do not re-add Facebook here without revisiting that decision.
 | Profile page — Reels tab | Remove tab; if URL path ends in `/reels/`, redirect to profile root. |
 | Profile page — post grid | Block the grid (anchored on `/p/` and `/reel/` links). Header — avatar, bio, follower counts, action buttons — is always preserved. When "Allow from following" is ON **and** the viewed profile is one you follow (header shows "Following"/"Requested"), the grid is shown. (Follow-detection is a text anchor; see NEXT_STEPS.md Unit I-3 for the selector caveat.) |
 | Home feed — "Suggested for you" posts | Blocked even when "Allow from following" is ON, since suggestions are not from people you follow. Anchored on the "Suggested for you"/"Suggested posts" label. |
-| DMs — shared reel/post preview | Replace with placeholder ("Content blocked") UNLESS "Allow messaged content" is on, in which case leave it visible. Never fully remove; messaging always works. |
+| DMs — shared reel/post preview | Always left visible — never blocked or replaced. Messaged content is sacred so you can discuss what was sent. |
 | Audio pages (`/audio/...`) | Redirect to home |
 | Hashtag/location pages | Block all entries |
 | Messages / DMs (`/direct/...`) | Always functional — never blocked |
@@ -200,16 +197,13 @@ TikTok's entire UI is short-form video. Strategy is more aggressive.
 | Explore / Trending | Replace with blocked screen |
 | LIVE tab | Block / hide |
 | Profile video grid | Hide all video thumbnails; keep profile header, bio, follower count visible |
-| DMs with video previews | Replace with "TikTok video blocked" placeholder |
+| DMs with video previews | Always left visible — never blocked or replaced |
 | `/video/XXXXXX` URL | Redirect to `/following` if sub-toggle on, else show blocked screen |
 | Search results | Block video entries |
 
 #### TikTok Blocked Screen Design
-An overlay covering the feed area. Simple and clean:
-- Dark background (`#0a0a0a`)
-- Centred text: "Short-form content blocked" in white, medium size
-- Smaller subtext below: "Focus Guard is active"
-- No buttons, no navigation prompts
+A plain monotone curtain covering the feed area. Simple and clean:
+- Dark background (`#0a0a0a`), no text, no buttons, no navigation prompts
 - **The overlay must NOT cover the left nav rail.** It is offset so its left edge
   sits at the nav rail's right edge (measured at runtime, fallback 240px). The
   sidebar — Following, Friends, Messages, Profile — must stay clickable so the
@@ -270,7 +264,7 @@ Anchor on tag names plus the `/shorts/` href — never on obfuscated classes.
 ### Popup Rules
 - Dark background (`#111`), white text, minimal
 - Timer is the visual hero — large, prominent, top of popup
-- ONE master toggle: "Block short-form content" — controls all platforms at once
+- ONE master toggle: "Block scrollable content" — controls all platforms at once
 - No per-platform toggles. Selective blocking is intentionally not offered. (YouTube is covered by this same switch once Phase 2 ships; it needs no UI of its own.)
 - Universal "Allow from following" sub-toggle at the bottom, separated by a divider
 - Both toggle states persist via `browser.storage.sync`
@@ -321,16 +315,7 @@ function blockElement(el) {
 
 Use `display: none` not `remove()` — platforms re-render removed elements and the observer would have to re-catch them. `display: none` is idempotent.
 
-For DM placeholders, instead of hiding, replace innerHTML:
-```javascript
-function placeholderElement(el, text) {
-  if (el.dataset.rbBlocked) return;
-  el.dataset.rbBlocked = 'true';
-  el.innerHTML = '';
-  el.style.cssText = 'padding:12px;background:#1a1a1a;color:#888;border-radius:8px;font-size:13px;';
-  el.textContent = text;
-}
-```
+DMs are never touched — content shared inside a conversation is always left visible (messaging is sacred), so there is no placeholder/replace path.
 
 ### MutationObserver
 ```javascript
@@ -392,7 +377,6 @@ function unblockAll() {
   });
 }
 ```
-Exception: DM placeholder elements cannot have their original content restored (it was replaced with `innerHTML = ''`). Leave placeholders in place when toggling off and note this limitation in `AGENT_SUMMARY.md`.
 
 ### Known Selector Starting Points
 These are best-known selectors as of mid-2025. They may have drifted — verify against live DOM if they don't work and update accordingly. Never use these as the only detection method; combine with video tag presence and URL patterns.
@@ -447,7 +431,7 @@ Follow this sequence exactly. Commit after each step. Do not skip or combine ste
 1. File structure — create all directories and empty files per the structure above
 2. `lib/browser-polyfill.js` — namespace shim
 3. `content/shared/storage.js` — storage wrapper with defaults
-4. `content/shared/blocker.js` — blockElement and placeholderElement functions
+4. `content/shared/blocker.js` — blockElement / unblockAll functions
 5. `content/shared/observer.js` — debounced MutationObserver factory
 6. Popup — `popup.html`, `popup.css`, `popup.js` with the master toggle + "Allow from following" sub-toggle, timer display, storage wiring
 7. `manifest.json` and `manifest.firefox.json` — with correct permissions and content script declarations
@@ -458,13 +442,13 @@ Follow this sequence exactly. Commit after each step. Do not skip or combine ste
 12. `content/instagram/feed.js` — auto-redirect For You → Following; block reels in Following when sub-toggle off
 13. `content/instagram/explore.js` — block reel cards, keep photo posts
 14. `content/instagram/profile.js` — hide Reels tab, redirect /username/reels/ to profile root
-15. `content/instagram/dms.js` — reel preview card placeholder
+15. (removed) — DMs are never touched; messaged content is always shown
 16. `content/instagram/instagram.js` — entry point, initialises all Instagram modules
 17. `content/tiktok/redirect.js` — /video/ URL interception, root / redirect logic
 18. `content/tiktok/feed.js` — For You and Explore blocked screen overlay
 19. `content/tiktok/following.js` — Following feed conditional on sub-toggle
 20. `content/tiktok/nav.js` — hide For You / Explore nav items
-21. `content/tiktok/dms.js` — video preview placeholder
+21. (removed) — DMs are never touched; messaged content is always shown
 22. `content/tiktok/tiktok.js` — entry point, initialises all TikTok modules
 23. `content/youtube/youtube.js` — phase 2 stub comment only
 24. Wire all content scripts to read from storage and respect toggle state on load and on storage change
@@ -501,6 +485,6 @@ Then stop.
 - Load unpacked: `chrome://extensions` → Developer mode → Load unpacked → select repo root
 - Firefox: `about:debugging` → This Firefox → Load Temporary Add-on → select `manifest.firefox.json`
 - Test SPA navigation — navigate between pages within the app, not just hard-loading URLs
-- Test DM surface explicitly — send a reel/TikTok from another account, verify placeholder appears
+- Test DM surface explicitly — send a reel/TikTok from another account, verify it stays VISIBLE (DMs are never blocked)
 - Test "Allow from following" toggle on and off for each platform
 - When a selector stops working after a platform update: inspect live DOM, find new stable anchor, update only the relevant module
