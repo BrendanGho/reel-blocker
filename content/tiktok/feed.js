@@ -58,21 +58,13 @@ window.RB.tk.setOverlay = function (show) {
     if (!o) {
       o = document.createElement('div');
       o.id = 'rb-tk-overlay';
-      const main = document.createElement('div');
-      main.textContent = 'Short-form content blocked';
-      main.style.cssText = 'color:#fff;font-size:20px;font-weight:600;';
-      const sub = document.createElement('div');
-      sub.textContent = 'Focus Guard is active';
-      sub.style.cssText = 'color:#ccc;font-size:14px;';
-      o.appendChild(main);
-      o.appendChild(sub);
       (document.body || document.documentElement).appendChild(o);
     }
     // (Re)apply position every time so the rail stays exposed even if the
-    // layout reflows or the rail width changes.
+    // layout reflows or the rail width changes. A plain monotone curtain — no
+    // text — covering the feed area only.
     o.style.cssText = 'position:fixed;top:0;bottom:0;right:0;left:' + left + 'px;' +
-      'background:#0a0a0a;z-index:2147483647;display:flex;flex-direction:column;' +
-      'align-items:center;justify-content:center;gap:8px;';
+      'background:#0a0a0a;z-index:2147483647;';
   } else if (o) {
     o.remove();
   }
