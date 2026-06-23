@@ -91,6 +91,26 @@ the module — never hardcode guessed class names.
 Record the matching selectors in the relevant module as a comment dated with
 the day you verified them.
 
+### Automated TikTok diagnostic (`scripts/tiktok-probe.js`)
+
+For the TikTok creator-page bug (a profile you don't follow shows "Something
+went wrong" until you press its refresh button), use the auto-capturing probe
+instead of inspecting by hand. Open tiktok.com **logged in** with the extension
+loaded, paste the whole file into the DevTools console, then navigate to a
+not-followed creator's profile. The moment the error appears it prints (and
+clipboard-copies) a JSON report with: the error node's stable-attribute
+ancestry, the nearby refresh control, the run-up timeline (SPA navigations +
+mutation bursts + page errors, all timestamped), the **network run-up** (every
+fetch/XHR as pathname + status + duration — query strings stripped so no
+`ms_token`/signatures are logged), and the extension's own state (`window.RB`,
+`#rb-tk-overlay`, `html.rb-tk-block`, the `rb:*` mirror). It is read-only. Paste
+it on the **feed/home page first**, before navigating to the profile, so the
+run-up is captured. To prove whether the extension is implicated, run once with
+it **fully disabled** (toggled off in `chrome://extensions` / `about:addons`,
+not just blocking off) — `env.extensionLoaded` distinguishes the two. If the
+error still appears with the extension gone, it is a TikTok-side issue.
+Controls: `__rbProbe.dump()`, `__rbProbe.stop()`.
+
 ---
 
 ## UNIT A — YouTube Shorts (IMPLEMENTED — verify selectors only)
