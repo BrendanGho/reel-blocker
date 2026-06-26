@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Reel Blocker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="rb-popup">
+    <div class="rb-label">Blocked for</div>
+    <div id="timer" class="rb-timer">0 days 0 hrs 0 min</div>
+
+    <hr class="divider">
+
+    <label class="rb-row">
+      <span>Block reels</span>
+      <input type="checkbox" id="block-toggle">
+    </label>
+
+    <hr class="divider">
+
+    <label class="rb-row">
+      <span>Allow from people I follow</span>
+      <input type="checkbox" id="follow-toggle">
+    </label>
+
+  </div>
+
+  <script src="../lib/browser-polyfill.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
