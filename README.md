@@ -70,5 +70,4 @@ Both platforms are SPAs, so all DOM work goes through a `MutationObserver`; URL 
 
 ## Notes
 
-- TikTok and Facebook support were prototyped and removed — both fight blockers hard enough that they're better served by dedicated extensions. The experiments are preserved on the `archive/tiktok-experiment` and `archive/facebook-experiment` branches.
 - Platform selectors drift over time. They anchor on stable signals (`aria-label`, `role`, `href` patterns, `<video>` presence, URL paths) rather than obfuscated class names, but may still need occasional updates after a platform UI change.
